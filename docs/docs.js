@@ -96,48 +96,57 @@ function add_search() {
 
 class CategoricalPhaser {
   constructor() {
+    const rootContentNode = document.querySelector('div#content');
+    let currentNest;
+    let contentGroup = new Array;
+    Array.from(rootContentNode.children).forEach(element => {
+      contentGroup.push(element);
+      if (element == rootContentNode.lastElementChild || element.nextElementSibling.tagName == 'H1') {
+        contentGroup.forEach(element => {currentNest.appendChild(element);});
+        contentGroup = new Array;
+      } else if (element.tagName == 'H1') {
+        let newNest = document.createElement('div');
+        newNest.className = element.className;
+        element.removeAttribute('class');
+        currentNest = element.insertAdjacentElement('beforebegin', newNest);
+      }
+    });
     this.categories = {
-      'API': document.querySelectorAll('div#toc li.phaser-docs'),
-      'cheatsheets': document.querySelectorAll('div#toc li.phaser-cheatsheet'),
-      'the rest': document.querySelectorAll('div#toc li.phaser-rest')
+      'API': document.querySelectorAll('*.phaser-docs'),
+      'CHEATSHEET': document.querySelectorAll('*.phaser-cheatsheet'),
+      'Other': document.querySelectorAll('*.phaser-rest')
     };
-    let storage = JSON.parse(window.localStorage.getItem('CategoricalPhaser.categoryColors'));
+    this.storage = JSON.parse(window.localStorage.getItem('CategoricalPhaser.categoryColors'));
+    if (!(this.storage && JSON.stringify(Object.keys(this.storage)) == JSON.stringify(Object.keys(this.categories)))) {
+      this.storage = new Object;
+      Object.keys(this.categories).forEach(key => {this.storage[key] = 'palegreen';});
+    }
     Object.keys(this.categories).reverse().forEach(category => {
       let element = document.createElement('button');
       element.textContent = category;
-      if(storage) {
-        element.style.backgroundColor = storage[category];
-        if(storage[category] == 'pink') {this.phase(element, false);};
-      } else {element.style.backgroundColor = 'palegreen';}
+      element.style.backgroundColor = this.storage[category];
+      if (this.storage[category] == 'pink') {this.phase(element, false);};
       element.onclick = (event => {this.phase(event.target, true);});
       document.querySelector('#toc').insertAdjacentElement('afterbegin', element);
     });
   };
   phase(element, flip) {
-    let color = this.convert(element.style.backgroundColor, 'color', 'color', flip);
-    let mode = this.convert(element.style.backgroundColor, 'color', 'mode', flip);
+    const color = this.convert(element.style.backgroundColor, 'color', 'color', flip);
+    const mode = this.convert(element.style.backgroundColor, 'color', 'mode', flip);
     element.style.backgroundColor = color;
     this.categories[element.textContent].forEach(node => {node.style.display = mode;});
-    let storage = JSON.parse(window.localStorage.getItem('CategoricalPhaser.categoryColors'));
-    if(!storage) {
-      storage = {
-        'API': 'palegreen',
-        'cheatsheets': 'palegreen',
-        'the rest': 'palegreen'
-      };
-    };
-    storage[element.textContent] = color;
-    window.localStorage.setItem('CategoricalPhaser.categoryColors', JSON.stringify(storage));
+    this.storage[element.textContent] = color;
+    window.localStorage.setItem('CategoricalPhaser.categoryColors', JSON.stringify(this.storage));
   };
   convert(string, from, to, flip) {
-    let table = {
+    const colorModes = {
       'color': ['palegreen', 'pink'],
       'mode': ['', 'none']
     };
-    let index = table[from].indexOf(string);
-    if(index == -1) {throw `No such ${from}`;};
-    if(flip) {index = index ? 0 : 1;}
-    return table[to][index];
+    let index = colorModes[from].indexOf(string);
+    if (index == -1) {throw `No such ${from}`;}
+    if (flip) {index = index ? 0 : 1;}
+    return colorModes[to][index];
   };
 };
 

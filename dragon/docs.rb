@@ -252,6 +252,7 @@ S
     parse_log = []
 
     html_start_to_toc_start = <<-S
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
