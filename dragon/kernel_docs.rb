@@ -52,18 +52,22 @@ S
       log "* INFO: Retrieving docs for #{k.name}."
       final_string += k.docs_all
     end
-
+    
     final_string += "\n" + (($gtk.read_file "docs/source.txt") || "")
-
+    
     html_parse_result = (__docs_to_html__ final_string)
-
-    $gtk.write_file_root 'docs/docs.txt', "#{final_string}"
-    $gtk.write_file_root 'docs/docs.html', html_parse_result[:html]
-    $gtk.write_file_root 'docs/parse_log.txt', (html_parse_result[:parse_log].join "\n")
-
-    log "* INFO: All docs have been exported to docs/docs.txt."
-    log "* INFO: All docs have been exported to docs/docs.html."
-
+    
+    docs_txt_path = 'mygame/app/dragonruby-game-toolkit-contrib/docs/docs.txt'
+    docs_html_path = 'mygame/app/dragonruby-game-toolkit-contrib/docs/docs.html'
+    parse_log_txt_path = 'mygame/app/dragonruby-game-toolkit-contrib/docs/parse_log.txt'
+    
+    $gtk.write_file_root docs_txt_path, "#{final_string}"
+    $gtk.write_file_root docs_html_path, html_parse_result[:html]
+    $gtk.write_file_root parse_log_txt_path, (html_parse_result[:parse_log].join "\n")
+    
+    log "* INFO: Text docs have been exported to #{docs_txt_path}."
+    log "* INFO: HTML docs have been exported to #{docs_html_path}."
+    
     nil
   end
 end

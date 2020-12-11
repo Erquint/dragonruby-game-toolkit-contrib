@@ -254,8 +254,10 @@ S
     html_start_to_toc_start = <<-S
 <html>
   <head>
+    <meta charset="utf-8">
     <title>DragonRuby Game Toolkit Documentation</title>
     <link href="docs.css?ver=#{Time.now.to_i}" rel="stylesheet" type="text/css" media="all">
+    <script src="docs.js"></script>
   </head>
   <body>
     <div id='toc'>
@@ -404,8 +406,9 @@ S
         inside_ul = false
         formatted_html = __docs_line_to_html__ l, parse_log
         link_id = text_to_id.call l
-        toc_html += "<li><a href='##{link_id}'>#{formatted_html}</a></li>\n"
-        content_html += "<h1 id='#{link_id}'>#{formatted_html}</h1>\n"
+        link_class = (__docs_line_to_class__ l)
+        toc_html += "<li class='#{link_class}'><a href='##{link_id}'>#{formatted_html}</a></li>\n"
+        content_html += "<h1 class='#{link_class}' id='#{link_id}'>#{formatted_html}</h1>\n"
       elsif l.start_with? "** "
         parse_log << "- H2 detected."
         content_html += close_list_if_needed.call inside_ul, inside_ol
@@ -540,10 +543,16 @@ S
       parse_log: parse_log
     }
   rescue Exception => e
-    $gtk.write_file_root 'docs/parse_log.txt', (parse_log.join "\n")
+    $gtk.write_file_root 'mygame/app/dragonruby-game-toolkit-contrib/docs/parse_log.txt', (parse_log.join "\n")
     raise "* ERROR in Docs::__docs_to_html__. #{e}"
   end
-
+  
+  def __docs_line_to_class__ line
+    return 'phaser-docs' if line.start_with? '* DOCS: '
+    return 'phaser-cheatsheet' if line.start_with? '* CHEATSHEET: '
+    return 'phaser-rest'
+  end
+  
   def __docs_line_to_html__ line, parse_log
     parse_log << "- Determining if line is a header."
     if line.start_with? "**** "
